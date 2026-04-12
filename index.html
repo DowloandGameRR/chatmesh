@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatMesh - Sosyal Ağ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .story-ring {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 3px;
+            border-radius: 50%;
+        }
+        
+        .story-ring-seen {
+            background: #dbdbdb;
+            padding: 3px;
+            border-radius: 50%;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .heart-animation {
+            animation: heart-beat 0.3s ease-in-out;
+        }
+        
+        @keyframes heart-beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .admin-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .toast {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Auth Section -->
+    <div id="authSection" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4 fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">ChatMesh</h1>
+                <p class="text-gray-500">Arkadaşlarınızla bağlantıda kalın</p>
+            </div>
+            
+            <div id="loginForm">
+                <div class="space-y-4">
+                    <div>
+                        <input type="text" id="loginEmail" placeholder="Kullanıcı adı veya email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <div>
+                        <input type="password" id="loginPassword" placeholder="Şifre" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-all transform hover:scale-[1.02]">
+                        Giriş Yap
+                    </button>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-500">Hesabınız yok mu? <button onclick="toggleAuthMode()" class="text-purple-600 font-semibold hover:underline">Kaydol</button></p>
+                </div>
+            </div>
+            
+            <div id="registerForm" class="hidden">
+                <div class="space-y-4">
+                    <div>
+                        <input type="text" id="regUsername" placeholder="Kullanıcı adı" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <div>
+                        <input type="email" id="regEmail" placeholder="Email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <div>
+                        <input type="password" id="regPassword" placeholder="Şifre" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <button onclick="handleRegister()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-all transform hover:scale-[1.02]">
+                        Kaydol
+                    </button>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-500">Zaten hesabınız var mı? <button onclick="toggleAuthMode()" class="text-purple-600 font-semibold hover:underline">Giriş Yap</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Desktop Sidebar -->
+        <nav class="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex-col justify-between p-6 z-40">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-8 px-2">ChatMesh</h1>
+                
+                <div class="space-y-2">
+                    <button onclick="navigateTo('home')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 transition-all group active-nav" data-page="home">
+                        <i class="fas fa-home text-xl group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Ana Sayfa</span>
+                    </button>
+                    <button onclick="navigateTo('search')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 transition-all group" data-page="search">
+                        <i class="fas fa-search text-xl group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Ara</span>
+                    </button>
+                    <button onclick="navigateTo('explore')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 transition-all group" data-page="explore">
+                        <i class="fas fa-compass text-xl group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Keşfet</span>
+                    </button>
+                    <button onclick="navigateTo('create')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 transition-all group" data-page="create">
+                        <i class="fas fa-plus-square text-xl group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Oluştur</span>
+                    </button>
+                    <button onclick="navigateTo('profile')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 transition-all group" data-page="profile">
+                        <i class="fas fa-user text-xl group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Profil</span>
+                    </button>
+                    <button id="adminNavBtn" onclick="toggleAdminPanel()" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-purple-100 text-purple-600 transition-all group hidden" data-page="admin">
+                        <i class="fas fa-shield-alt text-xl group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Admin Panel</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div>
+                <button onclick="handleLogout()" class="w-full flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 transition-all text-red-500">
+                    <i class="fas fa-sign-out-alt text-xl"></i>
+                    <span class="font-medium">Çıkış Yap</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center p-3 z-40">
+            <button onclick="navigateTo('home')" class="mobile-nav-btn p-2 text-gray-600 hover:text-purple-600 transition-all" data-page="home">
+                <i class="fas fa-home text-xl"></i>
+            </button>
+            <button onclick="navigateTo('search')" class="mobile-nav-btn p-2 text-gray-600 hover:text-purple-600 transition-all" data-page="search">
+                <i class="fas fa-search text-xl"></i>
+            </button>
+            <button onclick="navigateTo('create')" class="p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full transform -translate-y-4 shadow-lg">
+                <i class="fas fa-plus text-xl w-6 h-6 flex items-center justify-center"></i>
+            </button>
+            <button onclick="navigateTo('explore')" class="mobile-nav-btn p-2 text-gray-600 hover:text-purple-600 transition-all" data-page="explore">
+                <i class="fas fa-compass text-xl"></i>
+            </button>
+            <button onclick="navigateTo('profile')" class="mobile-nav-btn p-2 text-gray-600 hover:text-purple-600 transition-all" data-page="profile">
+                <i class="fas fa-user text-xl"></i>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="md:ml-64 pb-20 md:pb-0 min-h-screen">
+            <!-- Home Feed -->
+            <div id="homePage" class="page max-w-2xl mx-auto p-4">
+                <!-- Stories -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6 overflow-x-auto hide-scrollbar">
+                    <div class="flex space-x-4" id="storiesContainer">
+                        <div class="flex-shrink-0 text-center cursor-pointer" onclick="openStoryModal()">
+                            <div class="story-ring w-16 h-16 rounded-full p-[3px] mb-1">
+                                <div class="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-white">
+                                    <img id="myStoryImage" src="" class="w-full h-full object-cover hidden">
+                                    <i class="fas fa-plus text-gray-400" id="myStoryPlus"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs">Hikaye Ekle</p>
+                        </div>
+                        <!-- Stories will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Posts -->
+                <div id="postsContainer" class="space-y-6">
+                    <!-- Posts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Search Page -->
+            <div id="searchPage" class="page hidden max-w-2xl mx-auto p-4">
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Kullanıcı ara..." class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200" onkeyup="searchUsers()">
+                    </div>
+                </div>
+                <div id="searchResults" class="space-y-2"></div>
+            </div>
+
+            <!-- Explore Page -->
+            <div id="explorePage" class="page hidden max-w-6xl mx-auto p-4">
+                <h2 class="text-2xl font-bold mb-4">Keşfet</h2>
+                <div id="exploreGrid" class="grid grid-cols-3 gap-1 md:gap-4">
+                    <!-- Explore posts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Create Page -->
+            <div id="createPage" class="page hidden max-w-xl mx-auto p-4">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold mb-4">Gönderi Oluştur</h2>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4 cursor-pointer hover:border-purple-500 transition-all" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">Fotoğraf yüklemek için tıklayın</p>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="imagePreview" class="hidden mb-4">
+                        <img id="previewImg" class="w-full h-64 object-cover rounded-lg">
+                    </div>
+                    <textarea id="postCaption" placeholder="Açıklama yazın..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 resize-none mb-4" rows="3"></textarea>
+                    <button onclick="createPost()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-all">
+                        Paylaş
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profilePage" class="page hidden max-w-4xl mx-auto p-4">
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8">
+                        <div class="relative">
+                            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-purple-100">
+                                <img id="profileImage" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
+                            </div>
+                            <button onclick="document.getElementById('profilePicInput').click()" class="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition-all">
+                                <i class="fas fa-camera text-sm"></i>
+                            </button>
+                            <input type="file" id="profilePicInput" accept="image/*" class="hidden" onchange="updateProfilePicture(event)">
+                        </div>
+                        <div class="flex-1 text-center md:text-left">
+                            <div class="flex items-center justify-center md:justify-start space-x-3 mb-2">
+                                <h2 id="profileUsername" class="text-2xl font-bold"></h2>
+                                <span id="verifiedBadge" class="hidden admin-badge text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Onaylı</span>
+                                </span>
+                            </div>
+                            <div class="flex justify-center md:justify-start space-x-6 mb-4">
+                                <div class="text-center">
+                                    <span id="postCount" class="block font-bold text-lg">0</span>
+                                    <span class="text-gray-500 text-sm">Gönderi</span>
+                                </div>
+                                <div class="text-center cursor-pointer hover:opacity-70" onclick="showFollowers()">
+                                    <span id="followerCount" class="block font-bold text-lg">0</span>
+                                    <span class="text-gray-500 text-sm">Takipçi</span>
+                                </div>
+                                <div class="text-center">
+                                    <span id="followingCount" class="block font-bold text-lg">0</span>
+                                    <span class="text-gray-500 text-sm">Takip</span>
+                                </div>
+                            </div>
+                            <p id="profileBio" class="text-gray-700 mb-4"></p>
+                            <button onclick="openEditProfile()" class="px-6 py-2 bg-gray-100 rounded-lg font-semibold hover:bg-gray-200 transition-all">Profili Düzenle</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-4">
+                    <div class="flex border-b border-gray-200 mb-4">
+                        <button class="flex-1 pb-2 border-b-2 border-purple-600 font-semibold text-purple-600">
+                            <i class="fas fa-th mr-2"></i>Gönderiler
+                        </button>
+                    </div>
+                    <div id="userPosts" class="grid grid-cols-3 gap-1 md:gap-4">
+                        <!-- User posts grid -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="adminPanel" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+                    <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                        <div>
+                            <h2 class="text-2xl font-bold flex items-center">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                Admin Kontrol Paneli
+                            </h2>
+                            <p class="text-purple-100 text-sm mt-1">ChatMesh Yönetim Sistemi</p>
+                        </div>
+                        <button onclick="toggleAdminPanel()" class="text-white hover:text-gray-200 transition-all">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-blue-100 text-sm">Toplam Kullanıcı</p>
+                                        <p class="text-2xl font-bold" id="adminTotalUsers">0</p>
+                                    </div>
+                                    <i class="fas fa-users text-3xl opacity-50"></i>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-green-100 text-sm">Toplam Gönderi</p>
+                                        <p class="text-2xl font-bold" id="adminTotalPosts">0</p>
+                                    </div>
+                                    <i class="fas fa-image text-3xl opacity-50"></i>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-orange-100 text-sm">Bugün Aktif</p>
+                                        <p class="text-2xl font-bold" id="adminTodayActive">0</p>
+                                    </div>
+                                    <i class="fas fa-chart-line text-3xl opacity-50"></i>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-red-100 text-sm">Online Şimdi</p>
+                                        <p class="text-2xl font-bold" id="adminOnlineNow">1</p>
+                                    </div>
+                                    <i class="fas fa-signal text-3xl opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="flex space-x-4 mb-6 border-b border-gray-200">
+                            <button onclick="switchAdminTab('users')" class="admin-tab pb-2 px-4 border-b-2 border-purple-600 text-purple-600 font-semibold" data-tab="users">Kullanıcılar</button>
+                            <button onclick="switchAdminTab('posts')" class="admin-tab pb-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-purple-600" data-tab="posts">Gönderiler</button>
+                            <button onclick="switchAdminTab('logs')" class="admin-tab pb-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-purple-600" data-tab="logs">Sistem Logları</button>
+                        </div>
+
+                        <!-- Users Tab -->
+                        <div id="adminUsersTab" class="admin-tab-content">
+                            <div class="mb-4 flex justify-between items-center">
+                                <input type="text" id="adminSearchUser" placeholder="Kullanıcı ara..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" onkeyup="filterAdminUsers()">
+                                <button onclick="refreshAdminData()" class="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all">
+                                    <i class="fas fa-sync-alt mr-2"></i>Yenile
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50">
+                                            <th class="p-3 text-left text-sm font-semibold text-gray-600">Kullanıcı</th>
+                                            <th class="p-3 text-left text-sm font-semibold text-gray-600">Email</th>
+                                            <th class="p-3 text-left text-sm font-semibold text-gray-600">IP Adresi</th>
+                                            <th class="p-3 text-left text-sm font-semibold text-gray-600">Kayıt Tarihi</th>
+                                            <th class="p-3 text-left text-sm font-semibold text-gray-600">Durum</th>
+                                            <th class="p-3 text-left text-sm font-semibold text-gray-600">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminUsersTable" class="divide-y divide-gray-200">
+                                        <!-- Users will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Posts Tab -->
+                        <div id="adminPostsTab" class="admin-tab-content hidden">
+                            <div class="mb-4 flex justify-between items-center">
+                                <input type="text" id="adminSearchPost" placeholder="Gönderi ara..." class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" onkeyup="filterAdminPosts()">
+                                <button onclick="refreshAdminData()" class="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all">
+                                    <i class="fas fa-sync-alt mr-2"></i>Yenile
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="adminPostsGrid">
+                                <!-- Posts will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Logs Tab -->
+                        <div id="adminLogsTab" class="admin-tab-content hidden">
+                            <div class="bg-gray-900 rounded-xl p-4 font-mono text-sm text-green-400 h-96 overflow-y-auto" id="adminLogsContainer">
+                                <div class="mb-2">[SYSTEM] Admin panel initialized...</div>
+                                <div class="mb-2">[SYSTEM] Firebase connection established...</div>
+                                <div class="mb-2">[AUTH] Admin logged in successfully</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit User Modal -->
+            <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl w-full max-w-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Kullanıcı Düzenle</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
+                            <input type="text" id="editUserName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Takipçi Sayısı</label>
+                            <input type="number" id="editUserFollowers" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Takip Sayısı</label>
+                            <input type="number" id="editUserFollowing" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Profil Fotoğrafı URL</label>
+                            <input type="text" id="editUserPhoto" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="editUserVerified" class="w-4 h-4 text-purple-600">
+                            <label class="text-sm font-medium text-gray-700">Onaylı Hesap (Mavi Tik)</label>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button onclick="closeEditUserModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">İptal</button>
+                        <button onclick="saveUserEdit()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all">Kaydet</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged,
+            signOut,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            getDocs, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc,
+            onSnapshot,
+            query,
+            orderBy,
+            where,
+            serverTimestamp,
+            increment
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytes, 
+            getDownloadURL 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1KWjDklotAa1jI6oQvJP1vPizFhFjBas",
+            authDomain: "chatmesh-e46ec.firebaseapp.com",
+            projectId: "chatmesh-e46ec",
+            storageBucket: "chatmesh-e46ec.firebasestorage.app",
+            messagingSenderId: "895977946389",
+            appId: "1:895977946389:web:93ecb31cddebc91fdb3d1c",
+            measurementId: "G-XZEX0W92M5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Global State
+        let currentUser = null;
+        let currentUserData = null;
+        let selectedFile = null;
+        let editingUserId = null;
+        let allUsers = [];
+        let allPosts = [];
+
+        // Admin Credentials
+        const ADMIN_USERNAME = "admin";
+        const ADMIN_PASSWORD = "16153015";
+        const ADMIN_EMAIL = "admin@chatmesh.com";
+
+        // Initialize
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                showMainApp();
+                loadPosts();
+                loadStories();
+                if (isAdmin()) {
+                    document.getElementById('adminNavBtn').classList.remove('hidden');
+                    showToast('Admin olarak giriş yaptınız', 'success');
+                    addAdminLog('Admin giriş yaptı: ' + user.email);
+                }
+            } else {
+                showAuthSection();
+            }
+        });
+
+        // Auth Functions
+        window.toggleAuthMode = function() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            if (loginForm.classList.contains('hidden')) {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            }
+        };
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showToast('Lütfen tüm alanları doldurun', 'error');
+                return;
+            }
+
+            try {
+                // Check for admin credentials
+                if (email === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                    // Create admin user if not exists
+                    try {
+                        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+                    } catch (e) {
+                        // Admin doesn't exist, create it
+                        const userCred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+                        await setDoc(doc(db, 'users', userCred.user.uid), {
+                            username: 'admin',
+                            email: ADMIN_EMAIL,
+                            followers: 500000000,
+                            following: 0,
+                            posts: 0,
+                            verified: true,
+                            isAdmin: true,
+                            bio: 'ChatMesh Admin',
+                            profilePic: 'https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff',
+                            createdAt: serverTimestamp(),
+                            lastLogin: serverTimestamp(),
+                            ip: await getIP()
+                        });
+                        await updateProfile(userCred.user, {
+                            displayName: 'admin',
+                            photoURL: 'https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff'
+                        });
+                    }
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+                showToast('Giriş başarılı!', 'success');
+            } catch (error) {
+                showToast('Giriş hatası: ' + error.message, 'error');
+            }
+        };
+
+        window.handleRegister = async function() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (!username || !email || !password) {
+                showToast('Lütfen tüm alanları doldurun', 'error');
+                return;
+            }
+
+            try {
+                const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                
+                await setDoc(doc(db, 'users', userCred.user.uid), {
+                    username: username,
+                    email: email,
+                    followers: 0,
+                    following: 0,
+                    posts: 0,
+                    verified: false,
+                    isAdmin: false,
+                    bio: '',
+                    profilePic: `https://ui-avatars.com/api/?name=${username}&background=random`,
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                    ip: await getIP()
+                });
+
+                await updateProfile(userCred.user, {
+                    displayName: username,
+                    photoURL: `https://ui-avatars.com/api/?name=${username}&background=random`
+                });
+
+                showToast('Kayıt başarılı!', 'success');
+            } catch (error) {
+                showToast('Kayıt hatası: ' + error.message, 'error');
+            }
+        };
+
+        window.handleLogout = async function() {
+            try {
+                await signOut(auth);
+                showToast('Çıkış yapıldı', 'info');
+            } catch (error) {
+                showToast('Çıkış hatası: ' + error.message, 'error');
+            }
+        };
+
+        // Helper Functions
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (e) {
+                return 'unknown';
+            }
+        }
+
+        function isAdmin() {
+            return currentUserData && currentUserData.isAdmin === true;
+        }
+
+        async function loadUserData(uid) {
+            const docRef = doc(db, 'users', uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                currentUserData = docSnap.data();
+                updateProfileUI();
+            }
+        }
+
+        function updateProfileUI() {
+            if (!currentUserData) return;
+            
+            document.getElementById('profileUsername').textContent = currentUserData.username;
+            document.getElementById('profileImage').src = currentUserData.profilePic || 'https://via.placeholder.com/150';
+            document.getElementById('profileBio').textContent = currentUserData.bio || 'Henüz bir biyografi eklenmemiş.';
+            document.getElementById('followerCount').textContent = formatNumber(currentUserData.followers || 0);
+            document.getElementById('followingCount').textContent = formatNumber(currentUserData.following || 0);
+            document.getElementById('postCount').textContent = currentUserData.posts || 0;
+            
+            // Update story image
+            const myStoryImg = document.getElementById('myStoryImage');
+            const myStoryPlus = document.getElementById('myStoryPlus');
+            if (currentUserData.profilePic) {
+                myStoryImg.src = currentUserData.profilePic;
+                myStoryImg.classList.remove('hidden');
+                myStoryPlus.classList.add('hidden');
+            }
+
+            if (currentUserData.verified) {
+                document.getElementById('verifiedBadge').classList.remove('hidden');
+            } else {
+                document.getElementById('verifiedBadge').classList.add('hidden');
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num;
+        }
+
+        // Navigation
+        window.navigateTo = function(page) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            
+            // Show selected page
+            document.getElementById(page + 'Page').classList.remove('hidden');
+            
+            // Update nav active states
+            document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+                if (btn.dataset.page === page) {
+                    btn.classList.add('text-purple-600', 'bg-purple-50');
+                    btn.classList.remove('text-gray-600');
+                } else {
+                    btn.classList.remove('text-purple-600', 'bg-purple-50');
+                    btn.classList.add('text-gray-600');
+                }
+            });
+
+            // Load page specific data
+            if (page === 'profile') loadUserPosts();
+            if (page === 'explore') loadExplore();
+        };
+
+        // Posts Functions
+        function loadPosts() {
+            const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
+            
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('postsContainer');
+                container.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    const post = doc.data();
+                    const postEl = createPostElement(doc.id, post);
+                    container.appendChild(postEl);
+                });
+            });
+        }
+
+        function createPostElement(postId, post) {
+            const div = document.createElement('div');
+            div.className = 'bg-white rounded-xl shadow-sm overflow-hidden fade-in';
+            
+            const isLiked = post.likes && post.likes.includes(currentUser.uid);
+            
+            div.innerHTML = `
+                <div class="p-4 flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full overflow-hidden">
+                        <img src="${post.userPhoto || 'https://via.placeholder.com/40'}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-semibold">${post.username}</span>
+                            ${post.verified ? '<i class="fas fa-check-circle text-blue-500 text-sm"></i>' : ''}
+                        </div>
+                        <span class="text-gray-400 text-xs">${formatTimestamp(post.timestamp)}</span>
+                    </div>
+                    ${isAdmin() ? `
+                        <button onclick="deletePost('${postId}')" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="w-full aspect-square bg-gray-100">
+                    <img src="${post.imageUrl}" class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <div class="p-4">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <button onclick="toggleLike('${postId}')" class="text-2xl transition-transform active:scale-125 ${isLiked ? 'text-red-500' : 'text-gray-700 hover:text-gray-900'}">
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                        </button>
+                        <button class="text-2xl text-gray-700 hover:text-gray-900 transition-all">
+                            <i class="far fa-comment"></i>
+                        </button>
+                        <button class="text-2xl text-gray-700 hover:text-gray-900 transition-all">
+                            <i class="far fa-paper-plane"></i>
+                        </button>
+                        <button class="ml-auto text-2xl text-gray-700 hover:text-gray-900 transition-all">
+                            <i class="far fa-bookmark"></i>
+                        </button>
+                    </div>
+                    <p class="font-semibold mb-1">${formatNumber(post.likes ? post.likes.length : 0)} beğenme</p>
+                    <p><span class="font-semibold">${post.username}</span> ${post.caption}</p>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        window.toggleLike = async function(postId) {
+            const postRef = doc(db, 'posts', postId);
+            const postSnap = await getDoc(postRef);
+            
+            if (postSnap.exists()) {
+                const post = postSnap.data();
+                const likes = post.likes || [];
+                
+                if (likes.includes(currentUser.uid)) {
+                    await updateDoc(postRef, {
+                        likes: likes.filter(id => id !== currentUser.uid)
+                    });
+                } else {
+                    await updateDoc(postRef, {
+                        likes: [...likes, currentUser.uid]
+                    });
+                }
+            }
+        };
+
+        window.deletePost = async function(postId) {
+            if (!confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return;
+            
+            try {
+                await deleteDoc(doc(db, 'posts', postId));
+                showToast('Gönderi silindi', 'success');
+                addAdminLog(`Gönderi silindi: ${postId}`);
+            } catch (error) {
+                showToast('Silme hatası: ' + error.message, 'error');
+            }
+        };
+
+        // Create Post
+        window.handleFileSelect = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.createPost = async function() {
+            if (!selectedFile) {
+                showToast('Lütfen bir fotoğraf seçin', 'error');
+                return;
+            }
+
+            const caption = document.getElementById('postCaption').value;
+            const uploadBtn = event.target;
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Yükleniyor...';
+
+            try {
+                // Upload image
+                const storageRef = ref(storage, 'posts/' + Date.now() + '_' + selectedFile.name);
+                await uploadBytes(storageRef, selectedFile);
+                const imageUrl = await getDownloadURL(storageRef);
+
+                // Create post document
+                await addDoc(collection(db, 'posts'), {
+                    userId: currentUser.uid,
+                    username: currentUserData.username,
+                    userPhoto: currentUserData.profilePic,
+                    verified: currentUserData.verified,
+                    imageUrl: imageUrl,
+                    caption: caption,
+                    likes: [],
+                    timestamp: serverTimestamp()
+                });
+
+                // Update user post count
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    posts: increment(1)
+                });
+
+                showToast('Gönderi paylaşıldı!', 'success');
+                document.getElementById('postCaption').value = '';
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('fileInput').value = '';
+                selectedFile = null;
+                navigateTo('home');
+                
+                if (isAdmin()) {
+                    addAdminLog(`Yeni gönderi oluşturuldu: ${caption.substring(0, 30)}...`);
+                }
+            } catch (error) {
+                showToast('Yükleme hatası: ' + error.message, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = 'Paylaş';
+            }
+        };
+
+        // Stories
+        function loadStories() {
+            const container = document.getElementById('storiesContainer');
+            // Keep the first element (add story button)
+            const firstChild = container.firstElementChild;
+            container.innerHTML = '';
+            container.appendChild(firstChild);
+            
+            // Add sample stories
+            const stories = [
+                { name: 'ahmet', img: 'https://i.pravatar.cc/150?img=1' },
+                { name: 'ayse', img: 'https://i.pravatar.cc/150?img=5' },
+                { name: 'mehmet', img: 'https://i.pravatar.cc/150?img=3' },
+                { name: 'zeynep', img: 'https://i.pravatar.cc/150?img=9' },
+                { name: 'can', img: 'https://i.pravatar.cc/150?img=12' }
+            ];
+            
+            stories.forEach(story => {
+                const div = document.createElement('div');
+                div.className = 'flex-shrink-0 text-center cursor-pointer';
+                div.innerHTML = `
+                    <div class="story-ring w-16 h-16 rounded-full p-[3px] mb-1">
+                        <div class="w-full h-full rounded-full overflow-hidden border-2 border-white">
+                            <img src="${story.img}" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <p class="text-xs">${story.name}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.openStoryModal = function() {
+            showToast('Hikaye özelliği yakında geliyor!', 'info');
+        };
+
+        // Search
+        window.searchUsers = async function() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const container = document.getElementById('searchResults');
+            
+            if (!query) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            const q = query(collection(db, 'users'), where('username', '>=', query), where('username', '<=', query + '\uf8ff'));
+            const snapshot = await getDocs(q);
+            
+            container.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const user = doc.data();
+                const div = document.createElement('div');
+                div.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center space-x-3 cursor-pointer hover:bg-gray-50';
+                div.innerHTML = `
+                    <img src="${user.profilePic}" class="w-12 h-12 rounded-full">
+                    <div>
+                        <p class="font-semibold">${user.username} ${user.verified ? '<i class="fas fa-check-circle text-blue-500 ml-1"></i>' : ''}</p>
+                        <p class="text-gray-500 text-sm">${user.followers || 0} takipçi</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        // Profile Functions
+        async function loadUserPosts() {
+            const q = query(collection(db, 'posts'), where('userId', '==', currentUser.uid), orderBy('timestamp', 'desc'));
+            const snapshot = await getDocs(q);
+            
+            const container = document.getElementById('userPosts');
+            container.innerHTML = '';
+            
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                const div = document.createElement('div');
+                div.className = 'aspect-square bg-gray-100 cursor-pointer hover:opacity-90 transition-all';
+                div.innerHTML = `<img src="${post.imageUrl}" class="w-full h-full object-cover">`;
+                container.appendChild(div);
+            });
+        }
+
+        window.updateProfilePicture = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const storageRef = ref(storage, 'profiles/' + currentUser.uid);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    profilePic: url
+                });
+                
+                await updateProfile(currentUser, { photoURL: url });
+                
+                currentUserData.profilePic = url;
+                updateProfileUI();
+                showToast('Profil fotoğrafı güncellendi', 'success');
+            } catch (error) {
+                showToast('Yükleme hatası: ' + error.message, 'error');
+            }
+        };
+
+        window.openEditProfile = function() {
+            showToast('Profil düzenleme modalı yakında!', 'info');
+        };
+
+        // Explore
+        async function loadExplore() {
+            const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
+            const snapshot = await getDocs(q);
+            
+            const container = document.getElementById('exploreGrid');
+            container.innerHTML = '';
+            
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                const div = document.createElement('div');
+                div.className = 'aspect-square bg-gray-100 cursor-pointer hover:opacity-90 transition-all relative group';
+                div.innerHTML = `
+                    <img src="${post.imageUrl}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center space-x-4 text-white">
+                        <span><i class="fas fa-heart mr-1"></i>${post.likes ? post.likes.length : 0}</span>
+                        <span><i class="fas fa-comment mr-1"></i>0</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Admin Panel Functions
+        window.toggleAdminPanel = function() {
+            const panel = document.getElementById('adminPanel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                loadAdminData();
+            } else {
+                panel.classList.add('hidden');
+            }
+        };
+
+        async function loadAdminData() {
+            // Load users
+            const usersSnap = await getDocs(collection(db, 'users'));
+            allUsers = [];
+            usersSnap.forEach(doc => {
+                allUsers.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Load posts
+            const postsSnap = await getDocs(collection(db, 'posts'));
+            allPosts = [];
+            postsSnap.forEach(doc => {
+                allPosts.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Update stats
+            document.getElementById('adminTotalUsers').textContent = allUsers.length;
+            document.getElementById('adminTotalPosts').textContent = allPosts.length;
+            
+            renderAdminUsers();
+            renderAdminPosts();
+        }
+
+        function renderAdminUsers() {
+            const tbody = document.getElementById('adminUsersTable');
+            tbody.innerHTML = '';
+            
+            allUsers.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="flex items-center space-x-3">
+                            <img src="${user.profilePic || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full">
+                            <div>
+                                <p class="font-semibold">${user.username} ${user.verified ? '<i class="fas fa-check-circle text-blue-500 ml-1"></i>' : ''}</p>
+                                <p class="text-xs text-gray-500">${user.isAdmin ? 'Admin' : 'Kullanıcı'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-3 text-sm">${user.email}</td>
+                    <td class="p-3 text-sm font-mono text-gray-600">${user.ip || 'N/A'}</td>
+                    <td class="p-3 text-sm">${user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A'}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 rounded-full text-xs ${user.isAdmin ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'}">
+                            ${user.isAdmin ? 'Admin' : 'Aktif'}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        <button onclick="openEditUser('${user.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderAdminPosts() {
+            const container = document.getElementById('adminPostsGrid');
+            container.innerHTML = '';
+            
+            allPosts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-lg shadow-sm overflow-hidden';
+                div.innerHTML = `
+                    <div class="aspect-square bg-gray-100">
+                        <img src="${post.imageUrl}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <img src="${post.userPhoto}" class="w-6 h-6 rounded-full">
+                            <span class="text-sm font-semibold">${post.username}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 line-clamp-2 mb-2">${post.caption}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500"><i class="fas fa-heart text-red-500 mr-1"></i>${post.likes ? post.likes.length : 0}</span>
+                            <button onclick="deletePost('${post.id}')" class="text-red-500 hover:text-red-700 text-xs">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.switchAdminTab = function(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => {
+                if (t.dataset.tab === tab) {
+                    t.classList.add('border-purple-600', 'text-purple-600');
+                    t.classList.remove('border-transparent', 'text-gray-500');
+                } else {
+                    t.classList.remove('border-purple-600', 'text-purple-600');
+                    t.classList.add('border-transparent', 'text-gray-500');
+                }
+            });
+            
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById('admin' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Tab').classList.remove('hidden');
+        };
+
+        window.openEditUser = function(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            editingUserId = userId;
+            document.getElementById('editUserName').value = user.username || '';
+            document.getElementById('editUserFollowers').value = user.followers || 0;
+            document.getElementById('editUserFollowing').value = user.following || 0;
+            document.getElementById('editUserPhoto').value = user.profilePic || '';
+            document.getElementById('editUserVerified').checked = user.verified || false;
+            
+            document.getElementById('editUserModal').classList.remove('hidden');
+        };
+
+        window.closeEditUserModal = function() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            editingUserId = null;
+        };
+
+        window.saveUserEdit = async function() {
+            if (!editingUserId) return;
+            
+            const updates = {
+                username: document.getElementById('editUserName').value,
+                followers: parseInt(document.getElementById('editUserFollowers').value) || 0,
+                following: parseInt(document.getElementById('editUserFollowing').value) || 0,
+                profilePic: document.getElementById('editUserPhoto').value,
+                verified: document.getElementById('editUserVerified').checked
+            };
+            
+            try {
+                await updateDoc(doc(db, 'users', editingUserId), updates);
+                showToast('Kullanıcı güncellendi', 'success');
+                addAdminLog(`Kullanıcı düzenlendi: ${updates.username}`);
+                closeEditUserModal();
+                loadAdminData();
+            } catch (error) {
+                showToast('Güncelleme hatası: ' + error.message, 'error');
+            }
+        };
+
+        window.deleteUser = async function(userId) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
+            showToast('Kullanıcı silme işlemi demo modunda devre dışı', 'warning');
+        };
+
+        window.filterAdminUsers = function() {
+            const query = document.getElementById('adminSearchUser').value.toLowerCase();
+            const rows = document.querySelectorAll('#adminUsersTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        };
+
+        window.filterAdminPosts = function() {
+            const query = document.getElementById('adminSearchPost').value.toLowerCase();
+            const posts = document.querySelectorAll('#adminPostsGrid > div');
+            
+            posts.forEach(post => {
+                const text = post.textContent.toLowerCase();
+                post.style.display = text.includes(query) ? '' : 'none';
+            });
+        };
+
+        window.refreshAdminData = function() {
+            loadAdminData();
+            showToast('Veriler yenilendi', 'success');
+        };
+
+        function addAdminLog(message) {
+            const container = document.getElementById('adminLogsContainer');
+            const time = new Date().toLocaleTimeString();
+            const log = document.createElement('div');
+            log.className = 'mb-2';
+            log.innerHTML = `<span class="text-gray-500">[${time}]</span> ${message}`;
+            container.appendChild(log);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // UI Helpers
+        function showAuthSection() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'Az önce';
+            const date = timestamp.toDate();
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            
+            if (diff < 60) return 'Az önce';
+            if (diff < 3600) return Math.floor(diff / 60) + ' dakika önce';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' saat önce';
+            return Math.floor(diff / 86400) + ' gün önce';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            
+            toast.className = `toast ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 min-w-[300px]`;
+            toast.innerHTML = `
+                <i class="fas ${icons[type]}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize
+        window.showFollowers = function() {
+            if (isAdmin()) {
+                showToast('500 Milyon Takipçi! 🎉', 'success');
+            }
+        };
+
+        // Make functions global
+        window.isAdmin = isAdmin;
+    </script>
+</body>
+</html>
