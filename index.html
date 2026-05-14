@@ -3,1818 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChatMesh - Sosyal Ağ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f5f3ff',
-                            100: '#ede9fe',
-                            200: '#ddd6fe',
-                            300: '#c4b5fd',
-                            400: '#a78bfa',
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
-                            700: '#6d28d9',
-                            800: '#5b21b6',
-                            900: '#4c1d95',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Mobil Yoklama Sistemi</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --bg: #f8f9fa;
+            --text: #2b2d42;
         }
-        
-        .story-ring {
-            background: linear-gradient(45deg, #8b5cf6 0%, #7c3aed 25%, #6d28d9 50%, #5b21b6 75%, #4c1d95 100%);
-            padding: 3px;
-            border-radius: 50%;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden; /* Sağa sola kaymayı engeller */
         }
-        
-        .story-ring-seen {
-            background: #e5e7eb;
-            padding: 3px;
-            border-radius: 50%;
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
+
+        .card { display: none; }
+        .card.active { display: block; animation: fadeIn 0.5s; }
+
+        h2 { margin-bottom: 1.5rem; color: var(--primary); }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
         }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+
+        input:focus { border-color: var(--primary); }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
         }
-        
-        .heart-animation {
-            animation: heart-beat 0.3s ease-in-out;
+
+        .btn-teacher { background: #6c757d; margin-top: 20px; font-size: 0.8rem; }
+
+        #preview {
+            width: 100%;
+            border-radius: 15px;
+            background: #000;
+            margin-top: 15px;
         }
-        
-        @keyframes heart-beat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+
+        .user-list {
+            text-align: left;
+            margin-top: 20px;
+            padding: 0;
+            list-style: none;
         }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
+
+        .user-item {
+            background: #f1f3f5;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .verified-badge {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-        }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        
-        .toast {
-            transform: translateX(100%);
-            transition: transform 0.3s ease-out;
-        }
-        .toast.show {
-            transform: translateX(0);
-        }
-        
-        .mobile-nav-item {
-            position: relative;
-        }
-        
-        .mobile-nav-item.active::after {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: #7c3aed;
-            border-radius: 50%;
-        }
-        
-        .post-grid-item {
-            aspect-ratio: 1;
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-full {
-                width: 100vw;
-                margin-left: -1rem;
-                margin-right: -1rem;
-            }
-        }
-        
-        .skeleton {
-            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        .gradient-purple {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 50%, #4c1d95 100%);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(124, 58, 237, 0.5);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
-    <!-- Toast Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+<body>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-2xl flex flex-col items-center">
-            <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4"></div>
-            <p class="text-primary-700 font-semibold">Yükleniyor...</p>
+<div class="container">
+    <!-- ANA GİRİŞ EKRANI -->
+    <div id="login-screen" class="card active">
+        <h2>Öğrenci Girişi</h2>
+        <input type="text" id="studentName" placeholder="Adınız ve Soyadınız">
+        <button class="btn" onclick="startScanner()">Kamerayı Aç ve QR Oku</button>
+        
+        <button class="btn btn-teacher" onclick="showTeacherLogin()">Öğretmen Girişi</button>
+    </div>
+
+    <!-- QR TARAYICI EKRANI -->
+    <div id="scanner-screen" class="card">
+        <h2>QR Kodunu Taratın</h2>
+        <video id="preview"></video>
+        <button class="btn" style="background:#e63946" onclick="location.reload()">İptal</button>
+    </div>
+
+    <!-- ÖĞRETMEN GİRİŞ EKRANI -->
+    <div id="teacher-login-screen" class="card">
+        <h2>Öğretmen Paneli</h2>
+        <input type="password" id="teacherPass" placeholder="Giriş Şifresi">
+        <button class="btn" onclick="loginTeacher()">Giriş Yap</button>
+        <button class="btn btn-teacher" onclick="location.reload()">Geri Dön</button>
+    </div>
+
+    <!-- ÖĞRETMEN PANELİ (YOKLAMA LİSTESİ) -->
+    <div id="admin-panel" class="card">
+        <h2>Sınıf Listesi</h2>
+        <div id="qr-area">
+            <!-- Burada dinamik QR oluşturulabilir -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SINIF_GIRIS_2024" alt="Sınıf QR">
         </div>
+        <ul class="user-list" id="studentList">
+            <!-- Öğrenciler buraya eklenecek -->
+        </ul>
+        <button class="btn btn-teacher" onclick="location.reload()">Çıkış</button>
     </div>
+</div>
 
-    <!-- Auth Section -->
-    <div id="authSection" class="min-h-screen flex items-center justify-center gradient-purple p-4">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md fade-in">
-            <div class="text-center mb-6 md:mb-8">
-                <div class="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-comments text-white text-2xl md:text-3xl"></i>
-                </div>
-                <h1 class="text-2xl md:text-3xl font-bold text-primary-700 mb-2">ChatMesh</h1>
-                <p class="text-gray-500 text-sm md:text-base">Arkadaşlarınızla bağlantıda kalın</p>
-            </div>
-            
-            <div id="loginForm">
-                <div class="space-y-3 md:space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Adresi</label>
-                        <div class="relative">
-                            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="email" id="loginEmail" placeholder="ornek@email.com" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-base">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-                        <div class="relative">
-                            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="password" id="loginPassword" placeholder="••••••••" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-base">
-                        </div>
-                    </div>
-                    <button onclick="handleLogin()" class="w-full btn-primary text-white py-3 rounded-xl font-semibold text-base md:text-lg shadow-lg shadow-primary-500/30">
-                        Giriş Yap
-                    </button>
-                </div>
-                
-                <div class="mt-4 md:mt-6 text-center">
-                    <p class="text-gray-500 text-sm md:text-base">Hesabınız yok mu? <button onclick="toggleAuthMode()" class="text-primary-600 font-semibold hover:underline">Kaydol</button></p>
-                </div>
-                
-                <div class="mt-4 p-3 bg-primary-50 rounded-lg border border-primary-100">
-                    <p class="text-xs text-primary-700 text-center">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Admin: admin@chatmesh.com / 16153015
-                    </p>
-                </div>
-            </div>
-            
-            <div id="registerForm" class="hidden">
-                <div class="space-y-3 md:space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
-                        <div class="relative">
-                            <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="regUsername" placeholder="kullaniciadi" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-base">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Adresi</label>
-                        <div class="relative">
-                            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="email" id="regEmail" placeholder="ornek@email.com" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-base">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-                        <div class="relative">
-                            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="password" id="regPassword" placeholder="••••••••" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-base">
-                        </div>
-                    </div>
-                    <button onclick="handleRegister()" class="w-full btn-primary text-white py-3 rounded-xl font-semibold text-base md:text-lg shadow-lg shadow-primary-500/30">
-                        Kaydol
-                    </button>
-                </div>
-                
-                <div class="mt-4 md:mt-6 text-center">
-                    <p class="text-gray-500 text-sm md:text-base">Zaten hesabınız var mı? <button onclick="toggleAuthMode()" class="text-primary-600 font-semibold hover:underline">Giriş Yap</button></p>
-                </div>
-            </div>
-        </div>
-    </div>
+<script>
+    let currentName = "";
 
-    <!-- Main App -->
-    <div id="mainApp" class="hidden min-h-screen bg-gray-50">
-        <!-- Desktop Sidebar -->
-        <nav class="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex-col justify-between p-6 z-40">
-            <div>
-                <div class="flex items-center space-x-3 mb-8 px-2">
-                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-comments text-white text-lg"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-primary-700">ChatMesh</h1>
-                </div>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('home')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition-all group active-nav" data-page="home">
-                        <i class="fas fa-home text-xl w-6 text-center group-hover:scale-110 transition-transform"></i>
-                        <span class="font-medium">Ana Sayfa</span>
-                    </button>
-                    <button onclick="navigateTo('search')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition-all group" data-page="search">
-                        <i class="fas fa-search text-xl w-6 text-center group-hover:scale-110 transition-transform"></i>
-                        <span class="font-medium">Ara</span>
-                    </button>
-                    <button onclick="navigateTo('explore')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition-all group" data-page="explore">
-                        <i class="fas fa-compass text-xl w-6 text-center group-hover:scale-110 transition-transform"></i>
-                        <span class="font-medium">Keşfet</span>
-                    </button>
-                    <button onclick="navigateTo('create')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition-all group" data-page="create">
-                        <i class="fas fa-plus-square text-xl w-6 text-center group-hover:scale-110 transition-transform"></i>
-                        <span class="font-medium">Oluştur</span>
-                    </button>
-                    <button onclick="navigateTo('profile')" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-primary-50 text-gray-600 hover:text-primary-600 transition-all group" data-page="profile">
-                        <i class="fas fa-user text-xl w-6 text-center group-hover:scale-110 transition-transform"></i>
-                        <span class="font-medium">Profil</span>
-                    </button>
-                    <button id="adminNavBtn" onclick="toggleAdminPanel()" class="nav-btn w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-primary-100 text-primary-600 transition-all group hidden" data-page="admin">
-                        <i class="fas fa-shield-alt text-xl w-6 text-center group-hover:scale-110 transition-transform"></i>
-                        <span class="font-medium">Admin Panel</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div>
-                <button onclick="handleLogout()" class="w-full flex items-center space-x-4 p-3 rounded-xl hover:bg-red-50 text-red-500 transition-all">
-                    <i class="fas fa-sign-out-alt text-xl w-6 text-center"></i>
-                    <span class="font-medium">Çıkış Yap</span>
-                </button>
-            </div>
-        </nav>
+    function showTeacherLogin() {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.getElementById('teacher-login-screen').classList.add('active');
+    }
 
-        <!-- Mobile Bottom Nav -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center p-2 z-50 pb-safe">
-            <button onclick="navigateTo('home')" class="mobile-nav-item p-3 text-gray-400 hover:text-primary-600 transition-all flex flex-col items-center space-y-1" data-page="home">
-                <i class="fas fa-home text-xl"></i>
-                <span class="text-[10px]">Ana Sayfa</span>
-            </button>
-            <button onclick="navigateTo('search')" class="mobile-nav-item p-3 text-gray-400 hover:text-primary-600 transition-all flex flex-col items-center space-y-1" data-page="search">
-                <i class="fas fa-search text-xl"></i>
-                <span class="text-[10px]">Ara</span>
-            </button>
-            <button onclick="navigateTo('create')" class="p-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-full shadow-lg transform -translate-y-4 hover:scale-110 transition-all">
-                <i class="fas fa-plus text-xl w-6 h-6 flex items-center justify-center"></i>
-            </button>
-            <button onclick="navigateTo('explore')" class="mobile-nav-item p-3 text-gray-400 hover:text-primary-600 transition-all flex flex-col items-center space-y-1" data-page="explore">
-                <i class="fas fa-compass text-xl"></i>
-                <span class="text-[10px]">Keşfet</span>
-            </button>
-            <button onclick="navigateTo('profile')" class="mobile-nav-item p-3 text-gray-400 hover:text-primary-600 transition-all flex flex-col items-center space-y-1" data-page="profile">
-                <i class="fas fa-user text-xl"></i>
-                <span class="text-[10px]">Profil</span>
-            </button>
-        </nav>
+    function loginTeacher() {
+        const pass = document.getElementById('teacherPass').value;
+        if(pass === "16153015") {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.getElementById('admin-panel').classList.add('active');
+            // Burada Firebase'den mevcut listeyi çekme fonksiyonunu çalıştıracaksınız
+        } else {
+            Swal.fire('Hata', 'Hatalı Şifre!', 'error');
+        }
+    }
 
-        <!-- Main Content -->
-        <main class="md:ml-64 pb-20 md:pb-0 min-h-screen">
-            <!-- Home Feed -->
-            <div id="homePage" class="page w-full md:max-w-2xl mx-auto p-0 md:p-4">
-                <!-- Stories - Mobile Optimized -->
-                <div class="bg-white md:rounded-xl shadow-sm p-3 md:p-4 mb-2 md:mb-6 overflow-x-auto hide-scrollbar mobile-full">
-                    <div class="flex space-x-3 md:space-x-4 px-2" id="storiesContainer">
-                        <div class="flex-shrink-0 text-center cursor-pointer" onclick="openStoryModal()">
-                            <div class="story-ring w-14 h-14 md:w-16 md:h-16 rounded-full p-[2px] md:p-[3px] mb-1">
-                                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white relative">
-                                    <img id="myStoryImage" src="" class="w-full h-full object-cover hidden">
-                                    <i class="fas fa-plus text-primary-500 text-lg md:text-xl" id="myStoryPlus"></i>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-600">Hikaye Ekle</p>
-                        </div>
-                        <!-- Stories will be loaded dynamically -->
-                    </div>
-                </div>
+    function startScanner() {
+        currentName = document.getElementById('studentName').value;
+        if(!currentName) {
+            Swal.fire('Uyarı', 'Lütfen isminizi yazın!', 'warning');
+            return;
+        }
 
-                <!-- Posts -->
-                <div id="postsContainer" class="space-y-2 md:space-y-6 w-full">
-                    <!-- Posts will be loaded here -->
-                </div>
-                
-                <!-- Empty State -->
-                <div id="emptyPosts" class="hidden flex flex-col items-center justify-center py-12 text-center">
-                    <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-4">
-                        <i class="fas fa-camera text-primary-500 text-3xl"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Henüz Gönderi Yok</h3>
-                    <p class="text-gray-500 text-sm">İlk gönderiyi sen paylaş!</p>
-                </div>
-            </div>
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.getElementById('scanner-screen').classList.add('active');
 
-            <!-- Search Page -->
-            <div id="searchPage" class="page hidden w-full md:max-w-2xl mx-auto p-3 md:p-4">
-                <div class="bg-white rounded-xl shadow-sm p-3 md:p-4 mb-4">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="searchInput" placeholder="Kullanıcı ara..." class="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-200 text-base" onkeyup="searchUsers()">
-                    </div>
-                </div>
-                <div id="searchResults" class="space-y-2">
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-search text-4xl mb-3 text-gray-300"></i>
-                        <p>Kullanıcı aramak için yazmaya başlayın</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Explore Page -->
-            <div id="explorePage" class="page hidden w-full md:max-w-6xl mx-auto p-3 md:p-4">
-                <h2 class="text-xl md:text-2xl font-bold text-primary-700 mb-4 px-1">Keşfet</h2>
-                <div id="exploreGrid" class="grid grid-cols-3 gap-1 md:gap-4">
-                    <!-- Explore posts will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Create Page -->
-            <div id="createPage" class="page hidden w-full md:max-w-xl mx-auto p-3 md:p-4">
-                <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-                    <h2 class="text-xl font-bold text-primary-700 mb-4 flex items-center">
-                        <i class="fas fa-plus-circle mr-2"></i>
-                        Gönderi Oluştur
-                    </h2>
-                    <div id="uploadArea" class="border-2 border-dashed border-primary-300 rounded-xl p-6 md:p-8 text-center mb-4 cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-all" onclick="document.getElementById('fileInput').click()">
-                        <i class="fas fa-cloud-upload-alt text-4xl md:text-5xl text-primary-400 mb-3"></i>
-                        <p class="text-gray-600 font-medium mb-1">Fotoğraf yüklemek için tıklayın</p>
-                        <p class="text-gray-400 text-sm">veya sürükleyip bırakın</p>
-                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
-                    </div>
-                    <div id="imagePreview" class="hidden mb-4 relative">
-                        <img id="previewImg" class="w-full h-48 md:h-64 object-cover rounded-xl">
-                        <button onclick="clearImagePreview()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-all">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <textarea id="postCaption" placeholder="Açıklama yazın..." class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 resize-none mb-4 text-base" rows="3"></textarea>
-                    <button onclick="createPost()" id="createPostBtn" class="w-full btn-primary text-white py-3 rounded-xl font-semibold text-base md:text-lg shadow-lg shadow-primary-500/30 flex items-center justify-center">
-                        <span>Paylaş</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Profile Page -->
-            <div id="profilePage" class="page hidden w-full md:max-w-4xl mx-auto p-0 md:p-4">
-                <div class="bg-white md:rounded-xl shadow-sm p-4 md:p-6 mb-4">
-                    <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8">
-                        <div class="relative">
-                            <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-primary-100 shadow-lg">
-                                <img id="profileImage" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
-                            </div>
-                            <button onclick="document.getElementById('profilePicInput').click()" class="absolute bottom-0 right-0 bg-primary-600 text-white p-2 md:p-3 rounded-full hover:bg-primary-700 transition-all shadow-lg">
-                                <i class="fas fa-camera text-sm md:text-base"></i>
-                            </button>
-                            <input type="file" id="profilePicInput" accept="image/*" class="hidden" onchange="updateProfilePicture(event)">
-                        </div>
-                        <div class="flex-1 text-center md:text-left w-full">
-                            <div class="flex flex-col md:flex-row items-center justify-center md:justify-start space-y-2 md:space-y-0 md:space-x-3 mb-3">
-                                <h2 id="profileUsername" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
-                                <span id="verifiedBadge" class="hidden verified-badge text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 shadow-md">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Onaylı</span>
-                                </span>
-                            </div>
-                            <div class="flex justify-center md:justify-start space-x-6 md:space-x-8 mb-4">
-                                <div class="text-center">
-                                    <span id="postCount" class="block font-bold text-lg md:text-xl text-gray-800">0</span>
-                                    <span class="text-gray-500 text-xs md:text-sm">Gönderi</span>
-                                </div>
-                                <div class="text-center cursor-pointer hover:opacity-70 transition-all" onclick="showFollowers()">
-                                    <span id="followerCount" class="block font-bold text-lg md:text-xl text-gray-800">0</span>
-                                    <span class="text-gray-500 text-xs md:text-sm">Takipçi</span>
-                                </div>
-                                <div class="text-center">
-                                    <span id="followingCount" class="block font-bold text-lg md:text-xl text-gray-800">0</span>
-                                    <span class="text-gray-500 text-xs md:text-sm">Takip</span>
-                                </div>
-                            </div>
-                            <p id="profileBio" class="text-gray-700 mb-4 text-sm md:text-base max-w-md mx-auto md:mx-0"></p>
-                            <div class="flex space-x-3 justify-center md:justify-start">
-                                <button onclick="openEditProfile()" class="flex-1 md:flex-none px-6 py-2 bg-gray-100 rounded-xl font-semibold text-gray-700 hover:bg-gray-200 transition-all text-sm md:text-base">
-                                    Profili Düzenle
-                                </button>
-                                <button onclick="handleLogout()" class="md:hidden flex-1 px-6 py-2 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-all text-sm">
-                                    Çıkış
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white md:rounded-xl shadow-sm p-4">
-                    <div class="flex border-b border-gray-200 mb-4 justify-center md:justify-start">
-                        <button class="pb-3 px-4 border-b-2 border-primary-600 font-semibold text-primary-600 flex items-center text-sm md:text-base">
-                            <i class="fas fa-th mr-2"></i>Gönderiler
-                        </button>
-                    </div>
-                    <div id="userPosts" class="grid grid-cols-3 gap-1 md:gap-4">
-                        <!-- User posts grid -->
-                    </div>
-                    <div id="emptyUserPosts" class="hidden flex flex-col items-center justify-center py-12 text-center">
-                        <i class="fas fa-camera text-4xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">Henüz gönderi paylaşmadınız</p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Admin Panel Modal -->
-    <div id="adminPanel" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center p-0 md:p-4 overflow-hidden">
-        <div class="bg-white rounded-t-2xl md:rounded-2xl w-full md:w-full md:max-w-6xl h-[90vh] md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-            <div class="p-4 md:p-6 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-primary-600 to-primary-700 text-white flex-shrink-0">
-                <div>
-                    <h2 class="text-lg md:text-2xl font-bold flex items-center">
-                        <i class="fas fa-shield-alt mr-2"></i>
-                        Admin Kontrol Paneli
-                    </h2>
-                    <p class="text-primary-100 text-xs md:text-sm mt-1">ChatMesh Yönetim Sistemi</p>
-                </div>
-                <button onclick="toggleAdminPanel()" class="text-white hover:text-gray-200 transition-all p-2">
-                    <i class="fas fa-times text-xl md:text-2xl"></i>
-                </button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-4 md:p-6">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 md:p-4 text-white">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-blue-100 text-xs md:text-sm">Toplam Kullanıcı</p>
-                                <p class="text-xl md:text-2xl font-bold" id="adminTotalUsers">0</p>
-                            </div>
-                            <i class="fas fa-users text-2xl md:text-3xl opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-3 md:p-4 text-white">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-green-100 text-xs md:text-sm">Toplam Gönderi</p>
-                                <p class="text-xl md:text-2xl font-bold" id="adminTotalPosts">0</p>
-                            </div>
-                            <i class="fas fa-image text-2xl md:text-3xl opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-3 md:p-4 text-white">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-orange-100 text-xs md:text-sm">Bugün Aktif</p>
-                                <p class="text-xl md:text-2xl font-bold" id="adminTodayActive">0</p>
-                            </div>
-                            <i class="fas fa-chart-line text-2xl md:text-3xl opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-3 md:p-4 text-white">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-red-100 text-xs md:text-sm">Online Şimdi</p>
-                                <p class="text-xl md:text-2xl font-bold" id="adminOnlineNow">1</p>
-                            </div>
-                            <i class="fas fa-signal text-2xl md:text-3xl opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabs -->
-                <div class="flex space-x-2 md:space-x-4 mb-4 md:mb-6 border-b border-gray-200 overflow-x-auto hide-scrollbar">
-                    <button onclick="switchAdminTab('users')" class="admin-tab pb-2 px-3 md:px-4 border-b-2 border-primary-600 text-primary-600 font-semibold whitespace-nowrap text-sm md:text-base" data-tab="users">Kullanıcılar</button>
-                    <button onclick="switchAdminTab('posts')" class="admin-tab pb-2 px-3 md:px-4 border-b-2 border-transparent text-gray-500 hover:text-primary-600 whitespace-nowrap text-sm md:text-base" data-tab="posts">Gönderiler</button>
-                    <button onclick="switchAdminTab('logs')" class="admin-tab pb-2 px-3 md:px-4 border-b-2 border-transparent text-gray-500 hover:text-primary-600 whitespace-nowrap text-sm md:text-base" data-tab="logs">Sistem Logları</button>
-                </div>
-
-                <!-- Users Tab -->
-                <div id="adminUsersTab" class="admin-tab-content">
-                    <div class="mb-3 md:mb-4 flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0">
-                        <input type="text" id="adminSearchUser" placeholder="Kullanıcı ara..." class="w-full md:w-auto px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm" onkeyup="filterAdminUsers()">
-                        <button onclick="refreshAdminData()" class="w-full md:w-auto px-3 md:px-4 py-2 bg-primary-100 text-primary-600 rounded-lg hover:bg-primary-200 transition-all text-sm flex items-center justify-center">
-                            <i class="fas fa-sync-alt mr-2"></i>Yenile
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto -mx-4 px-4">
-                        <table class="w-full border-collapse min-w-[600px]">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="p-2 md:p-3 text-left text-xs md:text-sm font-semibold text-gray-600">Kullanıcı</th>
-                                    <th class="p-2 md:p-3 text-left text-xs md:text-sm font-semibold text-gray-600">Email</th>
-                                    <th class="p-2 md:p-3 text-left text-xs md:text-sm font-semibold text-gray-600">IP Adresi</th>
-                                    <th class="p-2 md:p-3 text-left text-xs md:text-sm font-semibold text-gray-600">Kayıt Tarihi</th>
-                                    <th class="p-2 md:p-3 text-left text-xs md:text-sm font-semibold text-gray-600">Durum</th>
-                                    <th class="p-2 md:p-3 text-left text-xs md:text-sm font-semibold text-gray-600">İşlemler</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminUsersTable" class="divide-y divide-gray-200 text-xs md:text-sm">
-                                <!-- Users will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Posts Tab -->
-                <div id="adminPostsTab" class="admin-tab-content hidden">
-                    <div class="mb-3 md:mb-4 flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0">
-                        <input type="text" id="adminSearchPost" placeholder="Gönderi ara..." class="w-full md:w-auto px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm" onkeyup="filterAdminPosts()">
-                        <button onclick="refreshAdminData()" class="w-full md:w-auto px-3 md:px-4 py-2 bg-primary-100 text-primary-600 rounded-lg hover:bg-primary-200 transition-all text-sm flex items-center justify-center">
-                            <i class="fas fa-sync-alt mr-2"></i>Yenile
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4" id="adminPostsGrid">
-                        <!-- Posts will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Logs Tab -->
-                <div id="adminLogsTab" class="admin-tab-content hidden">
-                    <div class="bg-gray-900 rounded-xl p-3 md:p-4 font-mono text-xs md:text-sm text-green-400 h-64 md:h-96 overflow-y-auto" id="adminLogsContainer">
-                        <div class="mb-2">[SYSTEM] Admin panel initialized...</div>
-                        <div class="mb-2">[SYSTEM] Firebase connection established...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit User Modal -->
-    <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-4 md:p-6 max-h-[90vh] overflow-y-auto">
-            <h3 class="text-lg md:text-xl font-bold text-primary-700 mb-4">Kullanıcı Düzenle</h3>
-            <div class="space-y-3 md:space-y-4">
-                <div>
-                    <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
-                    <input type="text" id="editUserName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base">
-                </div>
-                <div>
-                    <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="editUserEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base bg-gray-100" readonly>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Takipçi</label>
-                        <input type="number" id="editUserFollowers" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base">
-                    </div>
-                    <div>
-                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Takip</label>
-                        <input type="number" id="editUserFollowing" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Profil Fotoğrafı URL</label>
-                    <input type="text" id="editUserPhoto" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base">
-                </div>
-                <div class="flex items-center space-x-2 p-3 bg-primary-50 rounded-lg">
-                    <input type="checkbox" id="editUserVerified" class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500">
-                    <label class="text-sm font-medium text-primary-700">Onaylı Hesap (Mavi Tik)</label>
-                </div>
-                <div class="flex items-center space-x-2 p-3 bg-red-50 rounded-lg">
-                    <input type="checkbox" id="editUserAdmin" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
-                    <label class="text-sm font-medium text-red-700">Admin Yetkisi</label>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button onclick="closeEditUserModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all text-sm md:text-base">İptal</button>
-                <button onclick="saveUserEdit()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all text-sm md:text-base font-semibold">Kaydet</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div id="editProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-4 md:p-6">
-            <h3 class="text-lg md:text-xl font-bold text-primary-700 mb-4">Profili Düzenle</h3>
-            <div class="space-y-3 md:space-y-4">
-                <div>
-                    <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Kullanıcı Adı</label>
-                    <input type="text" id="editProfileUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base">
-                </div>
-                <div>
-                    <label class="block text-xs md:text-sm font-medium text-gray-700 mb-1">Biyografi</label>
-                    <textarea id="editProfileBio" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 text-sm md:text-base resize-none"></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button onclick="closeEditProfileModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all text-sm md:text-base">İptal</button>
-                <button onclick="saveProfileEdit()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all text-sm md:text-base font-semibold">Kaydet</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            onAuthStateChanged,
-            signOut,
-            updateProfile
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            setDoc, 
-            getDoc, 
-            getDocs, 
-            addDoc, 
-            updateDoc, 
-            deleteDoc,
-            onSnapshot,
-            query,
-            orderBy,
-            where,
-            serverTimestamp,
-            increment
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { 
-            getStorage, 
-            ref, 
-            uploadBytes, 
-            getDownloadURL,
-            deleteObject
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
-
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1KWjDklotAa1jI6oQvJP1vPizFhFjBas",
-            authDomain: "chatmesh-e46ec.firebaseapp.com",
-            projectId: "chatmesh-e46ec",
-            storageBucket: "chatmesh-e46ec.firebasestorage.app",
-            messagingSenderId: "895977946389",
-            appId: "1:895977946389:web:93ecb31cddebc91fdb3d1c",
-            measurementId: "G-XZEX0W92M5"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        // Global State
-        let currentUser = null;
-        let currentUserData = null;
-        let selectedFile = null;
-        let editingUserId = null;
-        let allUsers = [];
-        let allPosts = [];
-        let postsUnsubscribe = null;
-
-        // Admin Credentials
-        const ADMIN_EMAIL = "admin@chatmesh.com";
-        const ADMIN_PASSWORD = "16153015";
-
-        // Initialize App
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    await loadUserData(user.uid);
-                    showMainApp();
-                    setupRealtimeListeners();
-                    
-                    if (isAdmin()) {
-                        document.getElementById('adminNavBtn').classList.remove('hidden');
-                        showToast('Admin olarak giriş yaptınız', 'success');
-                        addAdminLog(`Admin giriş yaptı: ${user.email}`);
-                    }
-                } catch (error) {
-                    console.error("Kullanıcı verisi yüklenirken hata:", error);
-                    showToast('Kullanıcı verisi yüklenemedi', 'error');
-                }
-            } else {
-                showAuthSection();
+        let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false });
+        
+        scanner.addListener('scan', function (content) {
+            if(content === "SINIF_GIRIS_2024") {
+                saveToFirebase(currentName);
+                scanner.stop();
+                Swal.fire('Başarılı', 'Yoklamanız alındı!', 'success').then(() => {
+                    location.reload();
+                });
             }
         });
 
-        // Auth Functions
-        window.toggleAuthMode = function() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            loginForm.classList.toggle('hidden');
-            registerForm.classList.toggle('hidden');
-        };
-
-        window.handleLogin = async function() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showToast('Lütfen email ve şifre girin', 'error');
-                return;
-            }
-
-            // Admin girişi kontrolü
-            if (email === 'admin' || email === ADMIN_EMAIL) {
-                if (password !== ADMIN_PASSWORD) {
-                    showToast('Admin şifresi yanlış', 'error');
-                    return;
-                }
-                
-                try {
-                    // Admin kullanıcısı var mı kontrol et
-                    let adminUser = null;
-                    try {
-                        adminUser = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
-                    } catch (e) {
-                        // Admin yoksa oluştur
-                        if (e.code === 'auth/user-not-found') {
-                            const userCred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
-                            await setDoc(doc(db, 'users', userCred.user.uid), {
-                                username: 'admin',
-                                email: ADMIN_EMAIL,
-                                followers: 500000000,
-                                following: 0,
-                                posts: 0,
-                                verified: true,
-                                isAdmin: true,
-                                bio: 'ChatMesh Admin',
-                                profilePic: 'https://ui-avatars.com/api/?name=Admin&background=7c3aed&color=fff&size=256',
-                                createdAt: serverTimestamp(),
-                                lastLogin: serverTimestamp(),
-                                ip: await getIP()
-                            });
-                            await updateProfile(userCred.user, {
-                                displayName: 'admin',
-                                photoURL: 'https://ui-avatars.com/api/?name=Admin&background=7c3aed&color=fff&size=256'
-                            });
-                            showToast('Admin hesabı oluşturuldu ve giriş yapıldı', 'success');
-                            return;
-                        } else {
-                            throw e;
-                        }
-                    }
-                    showToast('Admin girişi başarılı!', 'success');
-                } catch (error) {
-                    showToast('Giriş hatası: ' + error.message, 'error');
-                }
-                return;
-            }
-
-            // Normal kullanıcı girişi
-            try {
-                showLoading(true);
-                await signInWithEmailAndPassword(auth, email, password);
-                showToast('Giriş başarılı!', 'success');
-            } catch (error) {
-                let errorMsg = 'Giriş başarısız';
-                if (error.code === 'auth/user-not-found') errorMsg = 'Kullanıcı bulunamadı';
-                else if (error.code === 'auth/wrong-password') errorMsg = 'Şifre yanlış';
-                else if (error.code === 'auth/invalid-email') errorMsg = 'Geçersiz email formatı';
-                else errorMsg = error.message;
-                showToast(errorMsg, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        window.handleRegister = async function() {
-            const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-
-            if (!username || !email || !password) {
-                showToast('Lütfen tüm alanları doldurun', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('Şifre en az 6 karakter olmalı', 'error');
-                return;
-            }
-
-            try {
-                showLoading(true);
-                const userCred = await createUserWithEmailAndPassword(auth, email, password);
-                
-                await setDoc(doc(db, 'users', userCred.user.uid), {
-                    username: username,
-                    email: email,
-                    followers: 0,
-                    following: 0,
-                    posts: 0,
-                    verified: false,
-                    isAdmin: false,
-                    bio: '',
-                    profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random&color=fff&size=256`,
-                    createdAt: serverTimestamp(),
-                    lastLogin: serverTimestamp(),
-                    ip: await getIP()
-                });
-
-                await updateProfile(userCred.user, {
-                    displayName: username,
-                    photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random&color=fff&size=256`
-                });
-
-                showToast('Kayıt başarılı! Hoş geldiniz.', 'success');
-            } catch (error) {
-                let errorMsg = 'Kayıt başarısız';
-                if (error.code === 'auth/email-already-in-use') errorMsg = 'Bu email zaten kullanımda';
-                else if (error.code === 'auth/invalid-email') errorMsg = 'Geçersiz email formatı';
-                else if (error.code === 'auth/weak-password') errorMsg = 'Şifre çok zayıf';
-                else errorMsg = error.message;
-                showToast(errorMsg, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        window.handleLogout = async function() {
-            try {
-                if (postsUnsubscribe) {
-                    postsUnsubscribe();
-                    postsUnsubscribe = null;
-                }
-                await signOut(auth);
-                currentUser = null;
-                currentUserData = null;
-                showToast('Çıkış yapıldı', 'info');
-            } catch (error) {
-                showToast('Çıkış hatası: ' + error.message, 'error');
-            }
-        };
-
-        // Helper Functions
-        async function getIP() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                return data.ip;
-            } catch (e) {
-                return 'unknown';
-            }
-        }
-
-        function isAdmin() {
-            return currentUserData && currentUserData.isAdmin === true;
-        }
-
-        async function loadUserData(uid) {
-            const docRef = doc(db, 'users', uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                currentUserData = docSnap.data();
-                updateProfileUI();
+        Instascan.Camera.getCameras().then(function (cameras) {
+            if (cameras.length > 0) {
+                // Arka kamerayı seçmeye çalış (varsa)
+                let selectedCam = cameras[cameras.length - 1]; 
+                scanner.start(selectedCam);
             } else {
-                // Kullanıcı verisi yoksa oluştur (eski kullanıcılar için)
-                const user = auth.currentUser;
-                if (user) {
-                    currentUserData = {
-                        username: user.displayName || user.email.split('@')[0],
-                        email: user.email,
-                        followers: 0,
-                        following: 0,
-                        posts: 0,
-                        verified: false,
-                        isAdmin: false,
-                        bio: '',
-                        profilePic: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=random`,
-                        createdAt: serverTimestamp(),
-                        lastLogin: serverTimestamp(),
-                        ip: await getIP()
-                    };
-                    await setDoc(docRef, currentUserData);
-                    updateProfileUI();
-                }
+                alert('Kamera bulunamadı.');
             }
-        }
+        }).catch(function (e) {
+            console.error(e);
+        });
+    }
 
-        function updateProfileUI() {
-            if (!currentUserData) return;
-            
-            document.getElementById('profileUsername').textContent = currentUserData.username || 'Kullanıcı';
-            document.getElementById('profileImage').src = currentUserData.profilePic || 'https://via.placeholder.com/150';
-            document.getElementById('profileBio').textContent = currentUserData.bio || 'Henüz bir biyografi eklenmemiş.';
-            document.getElementById('followerCount').textContent = formatNumber(currentUserData.followers || 0);
-            document.getElementById('followingCount').textContent = formatNumber(currentUserData.following || 0);
-            document.getElementById('postCount').textContent = currentUserData.posts || 0;
-            
-            // Update story image
-            const myStoryImg = document.getElementById('myStoryImage');
-            const myStoryPlus = document.getElementById('myStoryPlus');
-            if (currentUserData.profilePic) {
-                myStoryImg.src = currentUserData.profilePic;
-                myStoryImg.classList.remove('hidden');
-                myStoryPlus.classList.add('hidden');
-            }
+    // FIREBASE BAĞLANTISI İÇİN TASLAK FONKSİYON
+    function saveToFirebase(name) {
+        const now = new Date();
+        const time = now.getHours() + ":" + now.getMinutes();
+        
+        console.log("Firebase'e kaydediliyor:", name, time);
+        
+        /* 
+           Burada paylaştığın admin SDK yerine Web SDK kullanmalısın (Client side).
+           Örnek:
+           firebase.database().ref('yoklama/').push({
+               isim: name,
+               saat: time
+           });
+        */
+    }
+</script>
 
-            if (currentUserData.verified) {
-                document.getElementById('verifiedBadge').classList.remove('hidden');
-            } else {
-                document.getElementById('verifiedBadge').classList.add('hidden');
-            }
-        }
-
-        function formatNumber(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-            return num;
-        }
-
-        // Navigation
-        window.navigateTo = function(page) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            
-            // Show selected page
-            const targetPage = document.getElementById(page + 'Page');
-            if (targetPage) {
-                targetPage.classList.remove('hidden');
-            }
-            
-            // Update nav active states
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if (btn.dataset.page === page) {
-                    btn.classList.add('text-primary-600', 'bg-primary-50');
-                    btn.classList.remove('text-gray-600');
-                } else {
-                    btn.classList.remove('text-primary-600', 'bg-primary-50');
-                    btn.classList.add('text-gray-600');
-                }
-            });
-
-            // Update mobile nav
-            document.querySelectorAll('.mobile-nav-item').forEach(btn => {
-                if (btn.dataset.page === page) {
-                    btn.classList.add('text-primary-600', 'active');
-                    btn.classList.remove('text-gray-400');
-                } else {
-                    btn.classList.remove('text-primary-600', 'active');
-                    btn.classList.add('text-gray-400');
-                }
-            });
-
-            // Load page specific data
-            if (page === 'profile') loadUserPosts();
-            if (page === 'explore') loadExplore();
-            window.scrollTo(0, 0);
-        };
-
-        // Realtime Listeners
-        function setupRealtimeListeners() {
-            // Posts listener
-            const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
-            postsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('postsContainer');
-                const emptyState = document.getElementById('emptyPosts');
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '';
-                    emptyState.classList.remove('hidden');
-                    return;
-                }
-                
-                emptyState.classList.add('hidden');
-                container.innerHTML = '';
-                
-                snapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const postEl = createPostElement(doc.id, post);
-                    container.appendChild(postEl);
-                });
-            }, (error) => {
-                console.error("Posts listener error:", error);
-            });
-
-            // Stories listener (sadece son 24 saat)
-            const storiesQuery = query(
-                collection(db, 'stories'), 
-                where('timestamp', '>', new Date(Date.now() - 24 * 60 * 60 * 1000)),
-                orderBy('timestamp', 'desc')
-            );
-            
-            onSnapshot(storiesQuery, (snapshot) => {
-                loadStoriesRealtime(snapshot);
-            });
-        }
-
-        function createPostElement(postId, post) {
-            const div = document.createElement('div');
-            div.className = 'bg-white md:rounded-xl shadow-sm overflow-hidden fade-in mb-2 md:mb-0';
-            
-            const isLiked = post.likes && post.likes.includes(currentUser?.uid);
-            const timeAgo = formatTimestamp(post.timestamp);
-            
-            div.innerHTML = `
-                <div class="p-3 md:p-4 flex items-center space-x-3">
-                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden cursor-pointer" onclick="viewProfile('${post.userId}')">
-                        <img src="${post.userPhoto || 'https://via.placeholder.com/40'}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center space-x-2">
-                            <span class="font-semibold text-sm md:text-base truncate cursor-pointer hover:text-primary-600" onclick="viewProfile('${post.userId}')">${post.username}</span>
-                            ${post.verified ? '<i class="fas fa-check-circle text-primary-500 text-xs md:text-sm flex-shrink-0"></i>' : ''}
-                            <span class="text-gray-400 text-xs flex-shrink-0">• ${timeAgo}</span>
-                        </div>
-                    </div>
-                    ${isAdmin() || post.userId === currentUser?.uid ? `
-                        <button onclick="deletePost('${postId}')" class="text-gray-400 hover:text-red-500 transition-all p-2">
-                            <i class="fas fa-trash text-sm"></i>
-                        </button>
-                    ` : ''}
-                </div>
-                <div class="w-full aspect-square bg-gray-100 relative group">
-                    <img src="${post.imageUrl}" class="w-full h-full object-cover" loading="lazy" ondblclick="toggleLike('${postId}')">
-                </div>
-                <div class="p-3 md:p-4">
-                    <div class="flex items-center space-x-4 mb-2 md:mb-3">
-                        <button onclick="toggleLike('${postId}')" class="text-2xl transition-transform active:scale-125 ${isLiked ? 'text-red-500' : 'text-gray-700 hover:text-gray-900'}">
-                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                        </button>
-                        <button class="text-2xl text-gray-700 hover:text-gray-900 transition-all" onclick="focusComment('${postId}')">
-                            <i class="far fa-comment"></i>
-                        </button>
-                        <button class="text-2xl text-gray-700 hover:text-gray-900 transition-all">
-                            <i class="far fa-paper-plane"></i>
-                        </button>
-                        <button class="ml-auto text-2xl text-gray-700 hover:text-gray-900 transition-all" onclick="savePost('${postId}')">
-                            <i class="far fa-bookmark"></i>
-                        </button>
-                    </div>
-                    <p class="font-semibold text-sm md:text-base mb-1">${formatNumber(post.likes ? post.likes.length : 0)} beğenme</p>
-                    <p class="text-sm md:text-base"><span class="font-semibold">${post.username}</span> ${post.caption || ''}</p>
-                </div>
-            `;
-            
-            return div;
-        }
-
-        window.toggleLike = async function(postId) {
-            if (!currentUser) return;
-            
-            const postRef = doc(db, 'posts', postId);
-            try {
-                const postSnap = await getDoc(postRef);
-                if (postSnap.exists()) {
-                    const post = postSnap.data();
-                    const likes = post.likes || [];
-                    
-                    if (likes.includes(currentUser.uid)) {
-                        await updateDoc(postRef, {
-                            likes: likes.filter(id => id !== currentUser.uid)
-                        });
-                    } else {
-                        await updateDoc(postRef, {
-                            likes: [...likes, currentUser.uid]
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error("Like error:", error);
-            }
-        };
-
-        window.deletePost = async function(postId) {
-            if (!confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) return;
-            
-            try {
-                showLoading(true);
-                
-                // Önce post verisini al
-                const postRef = doc(db, 'posts', postId);
-                const postSnap = await getDoc(postRef);
-                
-                if (!postSnap.exists()) {
-                    showToast('Gönderi bulunamadı', 'error');
-                    return;
-                }
-                
-                const postData = postSnap.data();
-                
-                // Storage'dan resmi sil
-                if (postData.imageUrl) {
-                    try {
-                        const imageRef = ref(storage, postData.imageUrl);
-                        await deleteObject(imageRef);
-                    } catch (e) {
-                        console.log("Storage delete error (non-critical):", e);
-                    }
-                }
-                
-                // Firestore'dan sil
-                await deleteDoc(postRef);
-                
-                // Kullanıcı post sayısını güncelle
-                if (postData.userId) {
-                    const userRef = doc(db, 'users', postData.userId);
-                    await updateDoc(userRef, {
-                        posts: increment(-1)
-                    });
-                }
-                
-                showToast('Gönderi silindi', 'success');
-                addAdminLog(`Gönderi silindi: ${postId} by ${currentUserData?.username}`);
-                
-                // Profil sayfasındaysak yenile
-                if (!document.getElementById('profilePage').classList.contains('hidden')) {
-                    loadUserPosts();
-                }
-            } catch (error) {
-                showToast('Silme hatası: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        // Create Post
-        window.handleFileSelect = function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                selectedFile = file;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('previewImg').src = e.target.result;
-                    document.getElementById('imagePreview').classList.remove('hidden');
-                    document.getElementById('uploadArea').classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        window.clearImagePreview = function() {
-            selectedFile = null;
-            document.getElementById('fileInput').value = '';
-            document.getElementById('imagePreview').classList.add('hidden');
-            document.getElementById('uploadArea').classList.remove('hidden');
-        };
-
-        window.createPost = async function() {
-            if (!selectedFile) {
-                showToast('Lütfen bir fotoğraf seçin', 'error');
-                return;
-            }
-
-            const caption = document.getElementById('postCaption').value.trim();
-            const uploadBtn = document.getElementById('createPostBtn');
-            const originalText = uploadBtn.innerHTML;
-            
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Yükleniyor...';
-
-            try {
-                // Upload image
-                const storageRef = ref(storage, 'posts/' + currentUser.uid + '/' + Date.now() + '_' + selectedFile.name);
-                await uploadBytes(storageRef, selectedFile);
-                const imageUrl = await getDownloadURL(storageRef);
-
-                // Create post document
-                await addDoc(collection(db, 'posts'), {
-                    userId: currentUser.uid,
-                    username: currentUserData.username,
-                    userPhoto: currentUserData.profilePic,
-                    verified: currentUserData.verified,
-                    imageUrl: imageUrl,
-                    caption: caption,
-                    likes: [],
-                    comments: [],
-                    timestamp: serverTimestamp()
-                });
-
-                // Update user post count
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    posts: increment(1)
-                });
-
-                showToast('Gönderi paylaşıldı!', 'success');
-                
-                // Reset form
-                document.getElementById('postCaption').value = '';
-                clearImagePreview();
-                navigateTo('home');
-                
-                if (isAdmin()) {
-                    addAdminLog(`Yeni gönderi: ${caption.substring(0, 30)}...`);
-                }
-            } catch (error) {
-                showToast('Yükleme hatası: ' + error.message, 'error');
-            } finally {
-                uploadBtn.disabled = false;
-                uploadBtn.innerHTML = originalText;
-            }
-        };
-
-        // Stories
-        function loadStoriesRealtime(snapshot) {
-            const container = document.getElementById('storiesContainer');
-            // Keep the first element (add story button)
-            const firstChild = container.firstElementChild;
-            container.innerHTML = '';
-            container.appendChild(firstChild);
-            
-            const addedUsers = new Set();
-            
-            snapshot.forEach((doc) => {
-                const story = doc.data();
-                if (!addedUsers.has(story.userId)) {
-                    addedUsers.add(story.userId);
-                    const div = document.createElement('div');
-                    div.className = 'flex-shrink-0 text-center cursor-pointer';
-                    div.onclick = () => viewStory(story);
-                    div.innerHTML = `
-                        <div class="story-ring w-14 h-14 md:w-16 md:h-16 rounded-full p-[2px] md:p-[3px] mb-1">
-                            <div class="w-full h-full rounded-full overflow-hidden border-2 border-white">
-                                <img src="${story.userPhoto}" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-600 truncate max-w-[60px]">${story.username}</p>
-                    `;
-                    container.appendChild(div);
-                }
-            });
-        }
-
-        window.openStoryModal = function() {
-            showToast('Hikaye özelliği yakında!', 'info');
-        };
-
-        // Search
-        window.searchUsers = async function() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            const container = document.getElementById('searchResults');
-            
-            if (!searchQuery) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-search text-4xl mb-3 text-gray-300"></i>
-                        <p>Kullanıcı aramak için yazmaya başlayın</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            try {
-                const usersRef = collection(db, 'users');
-                // Basit arama - tüm kullanıcıları çek ve filtrele (küçük projeler için)
-                const snapshot = await getDocs(usersRef);
-                
-                container.innerHTML = '';
-                let found = false;
-                
-                snapshot.forEach((doc) => {
-                    const user = doc.data();
-                    if (user.username?.toLowerCase().includes(searchQuery) || 
-                        user.email?.toLowerCase().includes(searchQuery)) {
-                        found = true;
-                        const div = document.createElement('div');
-                        div.className = 'bg-white p-3 md:p-4 rounded-xl shadow-sm flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-all';
-                        div.onclick = () => viewProfile(doc.id);
-                        div.innerHTML = `
-                            <img src="${user.profilePic}" class="w-12 h-12 rounded-full object-cover">
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold truncate">${user.username} ${user.verified ? '<i class="fas fa-check-circle text-primary-500 ml-1"></i>' : ''}</p>
-                                <p class="text-gray-500 text-sm truncate">${user.email}</p>
-                                <p class="text-gray-400 text-xs">${formatNumber(user.followers || 0)} takipçi</p>
-                            </div>
-                            <button class="text-primary-600 font-semibold text-sm hover:text-primary-700">Profil</button>
-                        `;
-                        container.appendChild(div);
-                    }
-                });
-                
-                if (!found) {
-                    container.innerHTML = `
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-user-slash text-4xl mb-3 text-gray-300"></i>
-                            <p>Kullanıcı bulunamadı</p>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error("Search error:", error);
-            }
-        };
-
-        // Profile Functions
-        async function loadUserPosts() {
-            if (!currentUser) return;
-            
-            const q = query(
-                collection(db, 'posts'), 
-                where('userId', '==', currentUser.uid), 
-                orderBy('timestamp', 'desc')
-            );
-            
-            try {
-                const snapshot = await getDocs(q);
-                const container = document.getElementById('userPosts');
-                const emptyState = document.getElementById('emptyUserPosts');
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '';
-                    emptyState.classList.remove('hidden');
-                    return;
-                }
-                
-                emptyState.classList.add('hidden');
-                container.innerHTML = '';
-                
-                snapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const div = document.createElement('div');
-                    div.className = 'post-grid-item bg-gray-100 cursor-pointer hover:opacity-90 transition-all relative group';
-                    div.onclick = () => viewPostDetail(doc.id);
-                    div.innerHTML = `
-                        <img src="${post.imageUrl}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center space-x-4 text-white">
-                            <span class="flex items-center"><i class="fas fa-heart mr-1"></i>${post.likes?.length || 0}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } catch (error) {
-                console.error("Load user posts error:", error);
-            }
-        }
-
-        window.updateProfilePicture = async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            try {
-                showLoading(true);
-                const storageRef = ref(storage, 'profiles/' + currentUser.uid);
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    profilePic: url
-                });
-                
-                await updateProfile(currentUser, { photoURL: url });
-                
-                currentUserData.profilePic = url;
-                updateProfileUI();
-                showToast('Profil fotoğrafı güncellendi', 'success');
-            } catch (error) {
-                showToast('Yükleme hatası: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        window.openEditProfile = function() {
-            document.getElementById('editProfileUsername').value = currentUserData.username || '';
-            document.getElementById('editProfileBio').value = currentUserData.bio || '';
-            document.getElementById('editProfileModal').classList.remove('hidden');
-        };
-
-        window.closeEditProfileModal = function() {
-            document.getElementById('editProfileModal').classList.add('hidden');
-        };
-
-        window.saveProfileEdit = async function() {
-            const username = document.getElementById('editProfileUsername').value.trim();
-            const bio = document.getElementById('editProfileBio').value.trim();
-            
-            if (!username) {
-                showToast('Kullanıcı adı boş olamaz', 'error');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                await updateDoc(doc(db, 'users', currentUser.uid), {
-                    username: username,
-                    bio: bio
-                });
-                
-                await updateProfile(currentUser, { displayName: username });
-                
-                currentUserData.username = username;
-                currentUserData.bio = bio;
-                updateProfileUI();
-                
-                closeEditProfileModal();
-                showToast('Profil güncellendi', 'success');
-            } catch (error) {
-                showToast('Güncelleme hatası: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        // Explore
-        async function loadExplore() {
-            const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
-            
-            try {
-                const snapshot = await getDocs(q);
-                const container = document.getElementById('exploreGrid');
-                container.innerHTML = '';
-                
-                snapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const div = document.createElement('div');
-                    div.className = 'post-grid-item bg-gray-100 cursor-pointer hover:opacity-90 transition-all relative group';
-                    div.onclick = () => viewPostDetail(doc.id);
-                    div.innerHTML = `
-                        <img src="${post.imageUrl}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center space-x-3 text-white text-sm md:text-base">
-                            <span class="flex items-center"><i class="fas fa-heart mr-1"></i>${post.likes?.length || 0}</span>
-                            <span class="flex items-center"><i class="fas fa-comment mr-1"></i>${post.comments?.length || 0}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } catch (error) {
-                console.error("Explore load error:", error);
-            }
-        }
-
-        // Admin Panel Functions
-        window.toggleAdminPanel = function() {
-            const panel = document.getElementById('adminPanel');
-            if (panel.classList.contains('hidden')) {
-                panel.classList.remove('hidden');
-                loadAdminData();
-                document.body.style.overflow = 'hidden';
-            } else {
-                panel.classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-        };
-
-        async function loadAdminData() {
-            try {
-                // Load users
-                const usersSnap = await getDocs(collection(db, 'users'));
-                allUsers = [];
-                usersSnap.forEach(doc => {
-                    allUsers.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Load posts
-                const postsSnap = await getDocs(collection(db, 'posts'));
-                allPosts = [];
-                postsSnap.forEach(doc => {
-                    allPosts.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Update stats
-                document.getElementById('adminTotalUsers').textContent = allUsers.length;
-                document.getElementById('adminTotalPosts').textContent = allPosts.length;
-                
-                // Bugün aktif kullanıcılar (son 24 saat)
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const todayActive = allUsers.filter(u => {
-                    if (!u.lastLogin) return false;
-                    return u.lastLogin.toDate() > today;
-                }).length;
-                document.getElementById('adminTodayActive').textContent = todayActive;
-                
-                renderAdminUsers();
-                renderAdminPosts();
-            } catch (error) {
-                console.error("Admin data load error:", error);
-            }
-        }
-
-        function renderAdminUsers() {
-            const tbody = document.getElementById('adminUsersTable');
-            tbody.innerHTML = '';
-            
-            allUsers.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50';
-                const joinDate = user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString('tr-TR') : 'N/A';
-                
-                tr.innerHTML = `
-                    <td class="p-2 md:p-3">
-                        <div class="flex items-center space-x-2 md:space-x-3">
-                            <img src="${user.profilePic || 'https://via.placeholder.com/40'}" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover">
-                            <div class="min-w-0">
-                                <p class="font-semibold text-xs md:text-sm truncate">${user.username} ${user.verified ? '<i class="fas fa-check-circle text-primary-500 ml-1"></i>' : ''}</p>
-                                <p class="text-[10px] md:text-xs text-gray-500">${user.isAdmin ? 'Admin' : 'Kullanıcı'}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="p-2 md:p-3 text-xs md:text-sm truncate max-w-[100px] md:max-w-[150px]">${user.email}</td>
-                    <td class="p-2 md:p-3 text-xs font-mono text-gray-600">${user.ip || 'N/A'}</td>
-                    <td class="p-2 md:p-3 text-xs md:text-sm">${joinDate}</td>
-                    <td class="p-2 md:p-3">
-                        <span class="px-2 py-1 rounded-full text-[10px] md:text-xs ${user.isAdmin ? 'bg-primary-100 text-primary-600' : 'bg-green-100 text-green-600'}">
-                            ${user.isAdmin ? 'Admin' : 'Aktif'}
-                        </span>
-                    </td>
-                    <td class="p-2 md:p-3">
-                        <button onclick="openEditUser('${user.id}')" class="text-primary-600 hover:text-primary-800 mr-2 p-1">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        ${!user.isAdmin ? `
-                            <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-800 p-1">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        ` : ''}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderAdminPosts() {
-            const container = document.getElementById('adminPostsGrid');
-            container.innerHTML = '';
-            
-            allPosts.forEach(post => {
-                const div = document.createElement('div');
-                div.className = 'bg-white rounded-lg shadow-sm overflow-hidden';
-                div.innerHTML = `
-                    <div class="aspect-square bg-gray-100">
-                        <img src="${post.imageUrl}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-3">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <img src="${post.userPhoto}" class="w-6 h-6 rounded-full">
-                            <span class="text-xs md:text-sm font-semibold truncate">${post.username}</span>
-                        </div>
-                        <p class="text-xs text-gray-600 line-clamp-2 mb-2">${post.caption || ''}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500"><i class="fas fa-heart text-red-500 mr-1"></i>${post.likes?.length || 0}</span>
-                            <button onclick="deletePost('${post.id}')" class="text-red-500 hover:text-red-700 text-xs">
-                                <i class="fas fa-trash"></i> Sil
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        window.switchAdminTab = function(tab) {
-            document.querySelectorAll('.admin-tab').forEach(t => {
-                if (t.dataset.tab === tab) {
-                    t.classList.add('border-primary-600', 'text-primary-600');
-                    t.classList.remove('border-transparent', 'text-gray-500');
-                } else {
-                    t.classList.remove('border-primary-600', 'text-primary-600');
-                    t.classList.add('border-transparent', 'text-gray-500');
-                }
-            });
-            
-            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
-            document.getElementById('admin' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Tab').classList.remove('hidden');
-        };
-
-        window.openEditUser = function(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) return;
-            
-            editingUserId = userId;
-            document.getElementById('editUserName').value = user.username || '';
-            document.getElementById('editUserEmail').value = user.email || '';
-            document.getElementById('editUserFollowers').value = user.followers || 0;
-            document.getElementById('editUserFollowing').value = user.following || 0;
-            document.getElementById('editUserPhoto').value = user.profilePic || '';
-            document.getElementById('editUserVerified').checked = user.verified || false;
-            document.getElementById('editUserAdmin').checked = user.isAdmin || false;
-            
-            document.getElementById('editUserModal').classList.remove('hidden');
-        };
-
-        window.closeEditUserModal = function() {
-            document.getElementById('editUserModal').classList.add('hidden');
-            editingUserId = null;
-        };
-
-        window.saveUserEdit = async function() {
-            if (!editingUserId) return;
-            
-            const updates = {
-                username: document.getElementById('editUserName').value.trim(),
-                followers: parseInt(document.getElementById('editUserFollowers').value) || 0,
-                following: parseInt(document.getElementById('editUserFollowing').value) || 0,
-                profilePic: document.getElementById('editUserPhoto').value.trim(),
-                verified: document.getElementById('editUserVerified').checked,
-                isAdmin: document.getElementById('editUserAdmin').checked
-            };
-            
-            try {
-                showLoading(true);
-                await updateDoc(doc(db, 'users', editingUserId), updates);
-                showToast('Kullanıcı güncellendi', 'success');
-                addAdminLog(`Kullanıcı düzenlendi: ${updates.username}`);
-                closeEditUserModal();
-                loadAdminData();
-            } catch (error) {
-                showToast('Güncelleme hatası: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        window.deleteUser = async function(userId) {
-            if (!confirm('BU İŞLEM GERİ ALINAMAZ!\n\nBu kullanıcıyı ve tüm verilerini silmek istediğinize emin misiniz?')) return;
-            
-            try {
-                showLoading(true);
-                
-                // Kullanıcının gönderilerini sil
-                const postsQuery = query(collection(db, 'posts'), where('userId', '==', userId));
-                const postsSnap = await getDocs(postsQuery);
-                const deletePromises = [];
-                
-                postsSnap.forEach(postDoc => {
-                    deletePromises.push(deleteDoc(doc(db, 'posts', postDoc.id)));
-                });
-                
-                await Promise.all(deletePromises);
-                
-                // Kullanıcı dokümanını sil
-                await deleteDoc(doc(db, 'users', userId));
-                
-                showToast('Kullanıcı ve gönderileri silindi', 'success');
-                addAdminLog(`Kullanıcı silindi: ${userId}`);
-                loadAdminData();
-            } catch (error) {
-                showToast('Silme hatası: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
-        };
-
-        window.filterAdminUsers = function() {
-            const query = document.getElementById('adminSearchUser').value.toLowerCase();
-            const rows = document.querySelectorAll('#adminUsersTable tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
-        };
-
-        window.filterAdminPosts = function() {
-            const query = document.getElementById('adminSearchPost').value.toLowerCase();
-            const posts = document.querySelectorAll('#adminPostsGrid > div');
-            
-            posts.forEach(post => {
-                const text = post.textContent.toLowerCase();
-                post.style.display = text.includes(query) ? '' : 'none';
-            });
-        };
-
-        window.refreshAdminData = function() {
-            loadAdminData();
-            showToast('Veriler yenilendi', 'success');
-        };
-
-        function addAdminLog(message) {
-            const container = document.getElementById('adminLogsContainer');
-            const time = new Date().toLocaleTimeString('tr-TR');
-            const log = document.createElement('div');
-            log.className = 'mb-2 text-xs md:text-sm';
-            log.innerHTML = `<span class="text-gray-500">[${time}]</span> ${message}`;
-            container.appendChild(log);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // UI Helpers
-        function showAuthSection() {
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('mainApp').classList.add('hidden');
-        }
-
-        function showMainApp() {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-        }
-
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            if (show) {
-                overlay.classList.remove('hidden');
-            } else {
-                overlay.classList.add('hidden');
-            }
-        }
-
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return 'Az önce';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const now = new Date();
-            const diff = Math.floor((now - date) / 1000);
-            
-            if (diff < 60) return 'Az önce';
-            if (diff < 3600) return Math.floor(diff / 60) + ' dk';
-            if (diff < 86400) return Math.floor(diff / 3600) + ' saat';
-            return Math.floor(diff / 86400) + ' gün';
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            
-            const colors = {
-                success: 'bg-green-500',
-                error: 'bg-red-500',
-                warning: 'bg-yellow-500',
-                info: 'bg-primary-500'
-            };
-            
-            const icons = {
-                success: 'fa-check-circle',
-                error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle',
-                info: 'fa-info-circle'
-            };
-            
-            toast.className = `toast ${colors[type]} text-white px-4 md:px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2 pointer-events-auto max-w-[90vw] md:max-w-md`;
-            toast.innerHTML = `
-                <i class="fas ${icons[type]} flex-shrink-0"></i>
-                <span class="text-sm md:text-base">${message}</span>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Placeholder functions
-        window.viewProfile = function(userId) {
-            if (userId === currentUser?.uid) {
-                navigateTo('profile');
-            } else {
-                showToast('Kullanıcı profili görüntüleme yakında!', 'info');
-            }
-        };
-
-        window.viewPostDetail = function(postId) {
-            showToast('Gönderi detayı yakında!', 'info');
-        };
-
-        window.viewStory = function(story) {
-            showToast(`${story.username}'in hikayesi`, 'info');
-        };
-
-        window.focusComment = function(postId) {
-            showToast('Yorum özelliği yakında!', 'info');
-        };
-
-        window.savePost = function(postId) {
-            showToast('Kaydedilenlere eklendi', 'success');
-        };
-
-        window.showFollowers = function() {
-            if (isAdmin()) {
-                showToast('500 Milyon Takipçi! 🎉', 'success');
-            } else {
-                showToast(`${formatNumber(currentUserData?.followers || 0)} takipçi`, 'info');
-            }
-        };
-
-        // Make functions global
-        window.isAdmin = isAdmin;
-    </script>
 </body>
 </html>
